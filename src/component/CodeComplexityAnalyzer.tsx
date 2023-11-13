@@ -1,72 +1,60 @@
-import { useState } from 'react';
+// CodeComplexityAnalyzer.jsx
+import React, { useState } from 'react';
 import axios from 'axios';
-import { OpenAI } from 'openai';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-const CodeComplexityApp: React.FC = () => {
-  const [apiKey, setApiKey] = useState('');
+const CodeComplexityAnalyzer = () => {
   const [code, setCode] = useState('');
-  const [analysisResult, setAnalysisResult] = useState('');
-
+  const [complexityResult, setComplexityResult] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const analyzeCodeComplexity = async () => {
-    if (!apiKey || !code) {
-        toast.error('Please enter an API key and code to analyze.');
-        return;
-      }
-  
-      try {
-        const openai = new OpenAI({
-          apiKey: apiKey,
-        });
-  
-        const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: "You will be provided with Python code, and your task is to calculate its time complexity." },
-            { role: "user", content: code },
-          ],
-          temperature: 0,
-          max_tokens: 256,
-        });
-  
-        if (response.choices && response.choices.length > 0) {
-          setAnalysisResult(response.choices[0].text);
-        } else {
-          toast.error('Analysis result not found.');
-        }
-      } catch (error) {
-        toast.error('Error analyzing code. Please check your API key and code.');
-      }
+    setLoading(true);
+
+    try {
+      // Replace 'YOUR_API_ENDPOINT' with your actual code complexity analysis API endpoint
+      const response = await axios.post('YOUR_API_ENDPOINT', { code });
+
+      // Assuming the API response has a 'result' field
+      setComplexityResult(response.data.result);
+    } catch (error) {
+      console.error('Error analyzing code:', error);
+      setComplexityResult('Error analyzing code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="container mx-auto mt-8 px-4">
-      <h1 className="text-2xl font-bold mb-4">Code Complexity Analyzer</h1>
-      <input
-        type="text"
-        placeholder="Enter your OpenAI API key"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-        className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4"
-      />
-      <textarea
-        placeholder="Enter your code here..."
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        className="border rounded w-full py-40 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4"
-      />
+    <div className="container mx-auto p-8">
+      <h1 className="text-4xl font-bold mb-8">Code Complexity Analyzer</h1>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">Enter Your Code:</label>
+        <textarea
+          className="w-full h-32 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+        />
+      </div>
+
       <button
+        className="bg-blue-500 text-white px-4 py-2 rounded-md transition duration-300 hover:bg-blue-700"
         onClick={analyzeCodeComplexity}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        disabled={loading}
       >
-        Analyze Code
+        {loading ? 'Analyzing...' : 'Analyze Code'}
       </button>
-      {analysisResult && <div className="mt-4">Analysis Result: {analysisResult}</div>}
-      <ToastContainer position="top-right" autoClose={5000} hideProgressBar closeOnClick pauseOnHover />
+
+      {complexityResult && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Analysis Result:</h2>
+          <div className="bg-gray-100 p-4 rounded-md">
+            <pre className="whitespace-pre-line">{complexityResult}</pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default CodeComplexityApp;
+export default CodeComplexityAnalyzer;
