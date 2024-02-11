@@ -1,24 +1,47 @@
 // CodeComplexityAnalyzer.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import { AxiosError } from 'axios';
 
 const CodeComplexityAnalyzer = () => {
   const [code, setCode] = useState('');
-  const [complexityResult, setComplexityResult] = useState('');
+  const [analysisResult, setAnalysisResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const env = import.meta as any;
 
   const analyzeCodeComplexity = async () => {
     setLoading(true);
 
     try {
-      // Replace 'YOUR_API_ENDPOINT' with your actual code complexity analysis API endpoint
-      const response = await axios.post('YOUR_API_ENDPOINT', { code });
+      const response = await axios.post(
+        'https://api.openai.com/v1/engines/gpt-4/completions',
+        {
+          prompt: `
+          Analyzing the time complexity of the following code:
 
-      // Assuming the API response has a 'result' field
-      setComplexityResult(response.data.result);
+          \`\`\`python
+          ${code}
+          \`\`\`
+        `,
+          temperature: 0,
+          max_tokens: 1024,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          },
+        }
+      );
+
+      setAnalysisResult(response.data.choices[0].text);
     } catch (error) {
       console.error('Error analyzing code:', error);
-      setComplexityResult('Error analyzing code. Please try again.');
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        console.error('Error response:', axiosError.response);
+      }
+      setAnalysisResult('Error analyzing code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -45,11 +68,13 @@ const CodeComplexityAnalyzer = () => {
         {loading ? 'Analyzing...' : 'Analyze Code'}
       </button>
 
-      {complexityResult && (
+      {loading && <p className="mt-2">Analyzing, please wait...</p>}
+
+      {analysisResult && (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4">Analysis Result:</h2>
           <div className="bg-gray-100 p-4 rounded-md">
-            <pre className="whitespace-pre-line">{complexityResult}</pre>
+            <pre className="whitespace-pre-line">{analysisResult}</pre>
           </div>
         </div>
       )}
