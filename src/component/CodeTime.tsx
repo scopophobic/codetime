@@ -8,7 +8,7 @@ const CodeTime = () => {
   const [error, setError] = useState(null);
 
   // Fetch API key from environment variables or a secure storage mechanism
-  const API_KEY = "AIzaSyDg78AZkN9WFTm6aABosaZiwK03OioxQwA";
+  const API_KEY = "";
   console.log(API_KEY);
   const genAI = new GoogleGenerativeAI(API_KEY);
 
