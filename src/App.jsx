@@ -3,13 +3,17 @@ import CodeComplexityAnalyzer from './component/CodeComplexityAnalyzer'
 import Navbar from './component/navbar'
 import CodeTime from './component/CodeTime'
 import Foot from './component/Foot'
+import LearnTail from './component/LearnTail'
+
 
 const App = () => {
   return (
     <div>
         
-          {/* <Navbar/> */}
+          <Navbar/>
           <CodeTime/>
+
+          {/* <LearnTail/> */}
 
         
     </div>
